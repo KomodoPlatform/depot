@@ -112,3 +112,4 @@ chmod +x /home/ubuntu/cl-explorer/KMD-explorer-start.sh
 # Install latest Node 
 nvm install node
 nvm alias default node
+nvm use node
