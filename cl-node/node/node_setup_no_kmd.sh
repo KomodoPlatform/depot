@@ -17,12 +17,6 @@ sudo ufw allow 1337
 sudo ufw allow out 1337
 sudo ufw --force enable
 
-## Install Komodo
-git clone https://github.com/KomodoPlatform/komodo.git --branch master --single-branch
-cd komodo
-./zcutil/fetch-params.sh 
-./zcutil/build.sh
-
 ## Install Node for the custom script
 mkdir /home/ubuntu/.nvm
 wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
