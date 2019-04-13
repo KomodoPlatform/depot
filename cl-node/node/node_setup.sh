@@ -19,9 +19,9 @@ sudo ufw --force enable
 
 ## Install Komodo
 git clone https://github.com/KomodoPlatform/komodo.git /home/ubuntu/komodo/ --branch master --single-branch
-cd komodo
-./zcutil/fetch-params.sh 
-./zcutil/build.sh
+cd /home/ubuntu/komodo
+/home/ubuntu/komodo/zcutil/fetch-params.sh 
+/home/ubuntu/komodo/zcutil/build.sh
 
 ## Install Node for the custom script
 mkdir /home/ubuntu/.nvm
