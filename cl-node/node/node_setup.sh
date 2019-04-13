@@ -18,7 +18,7 @@ sudo ufw allow out 1337
 sudo ufw --force enable
 
 ## Install Komodo
-git clone https://github.com/KomodoPlatform/komodo.git --branch master --single-branch
+git clone https://github.com/KomodoPlatform/komodo.git /home/ubuntu/komodo/ --branch master --single-branch
 cd komodo
 ./zcutil/fetch-params.sh 
 ./zcutil/build.sh
