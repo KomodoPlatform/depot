@@ -12,5 +12,4 @@ else
   copy_cert()
   sudo service nginx start
   sudo pm2 restart baas-server
-  copy_cert()
 fi
