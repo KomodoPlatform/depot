@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 copy_cert () {
-  sudo cp -a -L /etc/letsencrypt/live/1337.naezith.com/. ~/cert
+  sudo cp -a -L /etc/letsencrypt/live/chainlizard.kmd.dev/. ~/cert
 }
 
 if [ "$1" = "copy" ]; then
