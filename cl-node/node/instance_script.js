@@ -14,7 +14,7 @@ const database_id = process.argv[5] || ''
 const reportStatus = async () => {
     try {
         const info = await getInfo()
-        const req = https.request(server_url + '/api/chains/report/status', {
+        const req = https.request(server_url + '/chains/report/status', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }
         }, res => res.on('data', d => process.stdout.write(d + '\n')))
         
@@ -61,7 +61,7 @@ if(action === 'reportStoppedGen') {
                     execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + ' setgenerate false')
 
                     // Report to the server
-                    https.get(server_url + '/api/chains/report/stoppedGen', response => {
+                    https.get(server_url + '/chains/report/stoppedGen', response => {
                         let data = ''
                         
                         // A chunk of data has been recieved.
@@ -104,7 +104,7 @@ else if(action === 'saveNodeImage') {
     
     console.log('Komodo Version: ', komodo_version)
     try {
-        const req = https.request(server_url + '/api/chains/report/saveNodeImage', {
+        const req = https.request(server_url + '/chains/report/saveNodeImage', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }
         }, res => res.on('data', d => process.stdout.write(d + '\n')))
         
