@@ -5,7 +5,10 @@ copy_cert () {
 }
 
 if [ "$1" = "copy" ]; then
+  sudo service nginx stop
   copy_cert
+  sudo service nginx start
+  sudo pm2 restart baas-server
 else
   sudo service nginx stop
   sudo certbot renew --force-renewal --standalone
