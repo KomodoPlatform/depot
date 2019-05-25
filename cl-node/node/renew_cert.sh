@@ -1,18 +1,11 @@
 #!/usr/bin/bash
 
-copy_cert () {
-  sudo cp -a -L /etc/letsencrypt/live/chainlizard.kmd.dev/. ~/cert
-}
+sudo service nginx stop
 
-if [ "$1" = "copy" ]; then
-  sudo service nginx stop
-  copy_cert
-  sudo service nginx start
-  sudo pm2 restart baas-server
-else
-  sudo service nginx stop
+if [ "$1" != "copy" ]; then
   sudo certbot renew --force-renewal --standalone
-  copy_cert
-  sudo service nginx start
-  sudo pm2 restart baas-server
 fi
+
+sudo cp -a -L /etc/letsencrypt/live/chainlizard.kmd.dev/. ~/cert
+sudo service nginx start
+sudo pm2 restart baas-server
