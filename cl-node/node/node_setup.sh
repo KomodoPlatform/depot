@@ -13,8 +13,6 @@ sudo ufw allow http
 sudo ufw allow out http
 sudo ufw allow https
 sudo ufw allow out https
-sudo ufw allow 1337
-sudo ufw allow out 1337
 sudo ufw --force enable
 
 ## Install Komodo
