@@ -247,18 +247,11 @@ class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
                                     console.log('Installing electrumx...')
                                     execSync(`cd ${electrum_folder} && sudo python3.6 ${electrum_folder}/setup.py install`)
 
-                                    // Run komodod for the new chain
-                                    console.log('Running komodod...')
-                                    exec(`/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`)
-                                    
-                                    // Wait a little for komodod to start
-                                    console.log('Waiting a little bit for komodod to launch properly...')
-                                    await sleep(10000)
-                                    
                                     // Save .conf of komodod
                                     console.log('Saving komodod conf...')
                                     const rpcuser = 'clizard'
                                     const rpcpassword = 'local321'
+                                    execSync(`mkdir -p /home/ubuntu/.komodo/${ticker}`)
                                     fs.writeFileSync(`/home/ubuntu/.komodo/${ticker}/${ticker}.conf`, `
 rpcuser=${rpcuser}
 rpcpassword=${rpcpassword}
@@ -268,6 +261,15 @@ txindex=1
 rpcworkqueue=256
 rpcallowip=127.0.0.1
 `)
+
+                                    // Run komodod for the new chain
+                                    console.log('Running komodod...')
+                                    exec(`/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`)
+                                    
+                                    // Wait a little for komodod to start
+                                    console.log('Waiting a little bit for komodod to launch properly...')
+                                    await sleep(10000)
+
                                     // More variables
                                     const service_name = `electrumx_${ticker}`
                                     const db_folder = `${spv_folder}/SPV/${ticker}`
