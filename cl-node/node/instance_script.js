@@ -207,7 +207,7 @@ else if(action === 'launchSPV') {
                                     const rpcport = c.status.rpcport
                                     const tcpport = p2pport-1 // -1 is p2pport
                                     const spv_rpcport = p2pport-2
-                                    const name_fixed = replaceAll(c.params_object.full_name, ' ', '') // Remove spaces
+                                    const name_fixed = '_' + replaceAll(c.params_object.full_name, ' ', '') // Remove spaces
 
                                     console.log(`Enabling SPV Server for:  ${name_fixed}  ${ticker}  ${rpcport}`)
                                     
@@ -260,14 +260,14 @@ class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
                                     const rpcuser = 'clizard'
                                     const rpcpassword = 'local321'
                                     fs.writeFileSync(`/home/ubuntu/.komodo/${ticker}/${ticker}.conf`, `
-        rpcuser=${rpcuser}
-        rpcpassword=${rpcpassword}
-        rpcport=${rpcport}
-        server=1
-        txindex=1
-        rpcworkqueue=256
-        rpcallowip=127.0.0.1
-        `)
+rpcuser=${rpcuser}
+rpcpassword=${rpcpassword}
+rpcport=${rpcport}
+server=1
+txindex=1
+rpcworkqueue=256
+rpcallowip=127.0.0.1
+`)
                                     // More variables
                                     const service_name = `electrumx_${ticker}`
                                     const db_folder = `${spv_folder}/SPV/${ticker}`
@@ -291,13 +291,13 @@ class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
                                     
                                     // Save the config file
                                     fs.writeFileSync(conf_file, `
-        COIN = ${name_fixed}
-        DB_DIRECTORY = ${db_folder}
-        DAEMON_URL = ${daemon_url}
-        SERVICES = tcp://:${tcpport},rpc://:${spv_rpcport}
-        EVENT_LOOP_POLICY = uvloop
-        PEER_DISCOVERY = self
-        `)
+COIN = ${name_fixed}
+DB_DIRECTORY = ${db_folder}
+DAEMON_URL = ${daemon_url}
+SERVICES = tcp://:${tcpport},rpc://:${spv_rpcport}
+EVENT_LOOP_POLICY = uvloop
+PEER_DISCOVERY = self
+`)
 
                                     // Add SPV cleanup line to crontab
                                     console.log('Adding SPV cleanup to crontab...')
