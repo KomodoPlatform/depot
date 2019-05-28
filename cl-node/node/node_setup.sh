@@ -15,6 +15,29 @@ sudo ufw allow https
 sudo ufw allow out https
 sudo ufw --force enable
 
+
+
+
+## Install dependencies for electrumx
+# python3.6 and pip3.6
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt-get update
+sudo apt-get install python3.6 -y
+curl https://bootstrap.pypa.io/get-pip.py | sudo -H python3.6
+# aiohttp pylru plyvel
+sudo pip3.6 install aiohttp pylru plyvel uvloop
+
+# Clone electrumx for SPV Server
+mkdir /home/ubuntu/spv-server
+cd /home/ubuntu/spv-server
+git clone https://github.com/kyuupichan/electrumx
+# Make DB folder
+mkdir /home/ubuntu/spv-server/SPV
+mkdir /home/ubuntu/spv-server/config
+
+
+
+
 ## Install Komodo
 git clone https://github.com/KomodoPlatform/komodo.git /home/ubuntu/komodo/ --branch master --single-branch
 cd /home/ubuntu/komodo
