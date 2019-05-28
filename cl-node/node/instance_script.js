@@ -178,10 +178,10 @@ else if(action === 'allowPort') {
 }
 
 
-// Wait till 128 before launching up SPV server
+// Wait till 32 before launching up SPV server
 else if(action === 'launchSPV') {
     (async () => {
-        console.log('Will launch up SPV Server when block hits 128')
+        console.log('Will launch up SPV Server when block hits 32')
 
         while(1) {
             await (new Promise(function (resolve, reject) {
@@ -224,8 +224,8 @@ else if(action === 'launchSPV') {
             NAME = "${name_fixed}"
             SHORTNAME = "${ticker}"
             NET = "mainnet"
-            TX_COUNT = 256
-            TX_COUNT_HEIGHT = 128
+            TX_COUNT = 64
+            TX_COUNT_HEIGHT = 32
             TX_PER_BLOCK = 2
             RPC_PORT = ${rpcport}
             REORG_LIMIT = 800
