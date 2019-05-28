@@ -220,18 +220,18 @@ else if(action === 'launchSPV') {
 
                                     // Add Coin details to the coins.py
                                     let new_coin = `
-        class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
-            NAME = "${name_fixed}"
-            SHORTNAME = "${ticker}"
-            NET = "mainnet"
-            TX_COUNT = 64
-            TX_COUNT_HEIGHT = 32
-            TX_PER_BLOCK = 2
-            RPC_PORT = ${rpcport}
-            REORG_LIMIT = 800
-            PEERS = []
+class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
+    NAME = "${name_fixed}"
+    SHORTNAME = "${ticker}"
+    NET = "mainnet"
+    TX_COUNT = 64
+    TX_COUNT_HEIGHT = 32
+    TX_PER_BLOCK = 2
+    RPC_PORT = ${rpcport}
+    REORG_LIMIT = 800
+    PEERS = []
 
-        `
+`
 
                                     // Save to coins.y
                                     const spv_folder = `/home/ubuntu/spv-server`
