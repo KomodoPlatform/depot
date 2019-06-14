@@ -15,6 +15,8 @@ const ac_name = process.argv[2]
 const action = process.argv[3]
 const server_url = process.argv[4] || '' // Needs to end with / because the action will be appended as endpoint
 const database_id = process.argv[5] || '' 
+const kmd_address = process.argv[6] || '' 
+const ac_supply = process.argv[7] || '' 
 
 
 const reportSPVEnabled =  chain_id => {
@@ -72,7 +74,7 @@ const getInfo = () =>
 
 // Report Stopped Gen
 if(action === 'reportStoppedGen') {
-    console.log('Will kill this intance when block hits 128')
+    console.log('Will kill stop gen in this instance when block hits 129')
 
     let time_to_stop = false
     
@@ -81,8 +83,8 @@ if(action === 'reportStoppedGen') {
             try {
                 const info = await getInfo()
 
-                if(info.blocks === 128) {
-                    console.log('Reached block 128')
+                if(info.blocks >= 129) {
+                    console.log('Reached block 129')
 
                     // Stop -gen
                     execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + ' setgenerate false')
@@ -111,6 +113,45 @@ if(action === 'reportStoppedGen') {
             }
         }
     }, 5*60*1000)
+}
+
+// Send premined coins
+else if(action === 'sendPremined') {
+    console.log('Will send premined coins when block hits 128')
+
+    let time_to_stop = false
+    
+    let interval = setInterval(async () => {
+        if(!time_to_stop) {
+            try {
+                const info = await getInfo()
+
+                if(info.blocks >= 128) {
+                    console.log('Reached block 128')
+
+                    // Send
+                    while(1) {
+                        try {
+                            execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + 
+                                    ' sendtoaddress ' + kmd_address + ' ' + ac_supply)
+                            
+                            console.log('Sent premined coins')
+                            
+                            // Our message is delivered to server perfectly, can exit this script safely
+                            time_to_stop = true
+                            clearInterval(interval)
+                            break
+                        } catch (error) {
+                            console.log(error)
+                            await sleep(10000)
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Error: ' + error)
+            }
+        }
+    }, 5000)
 }
 
 // Report Status
