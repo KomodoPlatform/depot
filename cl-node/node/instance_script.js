@@ -220,6 +220,53 @@ else if(action === 'allowPort') {
 
 
 // Wait till 32 before launching up SPV server
+else if(action === 'withdrawBalance') {
+    (async () => {
+        console.log('Will send all balance when requested')
+
+        while(1) {
+            await (new Promise(function (resolve, reject) {
+                try { 
+                    console.log('Checking if awaiting withdraw')
+                    https.get(server_url + '/chains/awaiting_withdraw', response => {
+                        let data = ''
+                        
+                        // A chunk of data has been recieved.
+                        response.on('data', chunk => { data += chunk })
+                    
+                        // The whole response has been received. Print out the result.
+                        response.on('end', async () => {
+                            let status 
+                            try { status = JSON.parse(data).status } catch (error) { console.log('JSON Parsing error', error) }
+                            
+                            // If yes,
+                            if(status === true) {
+                                console.log(`Withdrawing all balance to address`)
+                                
+                                execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
+                        
+                                console.log('Sent all balance')
+                            }
+                                    
+                            resolve()
+                        })
+                    }).on('error', err => { 
+                        console.log('Error: ' + err.message) 
+                        resolve()
+                    })
+                } catch (error) {
+                    console.log('Error: ' + error)
+                    resolve()
+                }
+            }))
+            
+            await sleep(5000)
+        }
+    })()
+}
+
+
+// Wait till 32 before launching up SPV server
 else if(action === 'launchSPV') {
     (async () => {
         console.log('Will launch up SPV Server when block hits 32')
