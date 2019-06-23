@@ -225,7 +225,7 @@ else if(action === 'withdrawBalance') {
         console.log('Will send all balance when requested')
 
         while(1) {
-            await (new Promise(function (resolve, reject) {
+            await (new Promise(async (resolve, reject) => {
                 try { 
                     console.log('Checking if awaiting withdraw, Reporting the status')
 
@@ -243,7 +243,7 @@ else if(action === 'withdrawBalance') {
                             
                             execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
                     
-                            console.log('Sent all balance')
+                            console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
                         }
                                 
                         resolve()
