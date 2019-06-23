@@ -227,33 +227,31 @@ else if(action === 'withdrawBalance') {
         while(1) {
             await (new Promise(function (resolve, reject) {
                 try { 
-                    console.log('Checking if awaiting withdraw')
-                    https.get(server_url + '/chains/awaiting_withdraw', response => {
-                        let data = ''
+                    console.log('Checking if awaiting withdraw, Reporting the status')
+
+                    const info = await getInfo()
+
+                    const req = https.request(server_url + '/chains/awaiting_withdraw', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }
+                    }, res => res.on('data', data => {
+                        let withdrawal 
+                        try { withdrawal = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
                         
-                        // A chunk of data has been recieved.
-                        response.on('data', chunk => { data += chunk })
-                    
-                        // The whole response has been received. Print out the result.
-                        response.on('end', async () => {
-                            let status 
-                            try { status = JSON.parse(data).status } catch (error) { console.log('JSON Parsing error', error) }
+                        // If yes,
+                        if(withdrawal.status === true) {
+                            console.log(`Withdrawing all balance to address`)
                             
-                            // If yes,
-                            if(status === true) {
-                                console.log(`Withdrawing all balance to address`)
+                            execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
+                    
+                            console.log('Sent all balance')
+                        }
                                 
-                                execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
-                        
-                                console.log('Sent all balance')
-                            }
-                                    
-                            resolve()
-                        })
-                    }).on('error', err => { 
-                        console.log('Error: ' + err.message) 
                         resolve()
-                    })
+                    }))
+                    
+                    req.on('error', e => { console.log(e); resolve() })
+                    req.write(JSON.stringify({ miner_status: info }))
+                    req.end()
                 } catch (error) {
                     console.log('Error: ' + error)
                     resolve()
