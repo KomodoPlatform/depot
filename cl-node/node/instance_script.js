@@ -219,7 +219,6 @@ else if(action === 'allowPort') {
 }
 
 
-// Wait till 32 before launching up SPV server
 else if(action === 'withdrawBalance') {
     (async () => {
         console.log('Will send all balance when requested')
@@ -228,30 +227,33 @@ else if(action === 'withdrawBalance') {
             await (new Promise(async (resolve, reject) => {
                 try { 
                     console.log('Checking if awaiting withdraw, Reporting the status')
-
+                    
                     const info = await getInfo()
 
-                    const req = https.request(server_url + '/chains/awaiting_withdraw', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }
-                    }, res => res.on('data', data => {
-                        let withdrawal 
-                        try { withdrawal = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
-                        
-                        // If yes,
-                        if(withdrawal.status === true) {
-                            console.log(`Withdrawing all balance to address`)
+                    if(info.blocks >= 129) {
+                        const req = https.request(server_url + '/chains/awaiting_withdraw', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }
+                        }, res => res.on('data', data => {
+                            let withdrawal 
+                            try { withdrawal = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
                             
-                            execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
-                    
-                            console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
-                        }
+                            // If yes,
+                            if(withdrawal.status === true) {
+                                console.log(`Withdrawing all balance to address`)
                                 
-                        resolve()
-                    }))
-                    
-                    req.on('error', e => { console.log(e); resolve() })
-                    req.write(JSON.stringify({ miner_status: info }))
-                    req.end()
+                                execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
+                        
+                                console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
+                            }
+                                    
+                            resolve()
+                        }))
+                        
+                        req.on('error', e => { console.log(e); resolve() })
+                        req.write(JSON.stringify({ miner_status: info }))
+                        req.end()
+                    }
+                    else resolve()
                 } catch (error) {
                     console.log('Error: ' + error)
                     resolve()
