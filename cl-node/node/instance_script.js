@@ -18,11 +18,24 @@ const database_id = process.argv[5] || ''
 const kmd_address = process.argv[6] || '' 
 const ac_supply = process.argv[7] || '' 
 
+const prepare_coins_py = (name_fixed, ticker, rpcport) => `
+class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
+    NAME = "${name_fixed}"
+    SHORTNAME = "${ticker}"
+    NET = "mainnet"
+    TX_COUNT = 64
+    TX_COUNT_HEIGHT = 32
+    TX_PER_BLOCK = 2
+    RPC_PORT = ${rpcport}
+    REORG_LIMIT = 800
+    PEERS = []
 
-const reportSPVEnabled =  chain_id => {
+`
+
+const reportSPV =  (chain_id, spv_status) => {
     return new Promise(function (resolve, reject) {
         try {
-            const req = https.request(server_url + '/chains/report/spvEnabled', {
+            const req = https.request(server_url + '/chains/report/spv' + spv_status, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }
             }, res => res.on('data', d => {
                 process.stdout.write(d + '\n')
@@ -307,19 +320,7 @@ else if(action === 'launchSPV') {
                                     execSync('sudo ufw reload')
 
                                     // Add Coin details to the coins.py
-                                    let new_coin = `
-class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
-    NAME = "${name_fixed}"
-    SHORTNAME = "${ticker}"
-    NET = "mainnet"
-    TX_COUNT = 64
-    TX_COUNT_HEIGHT = 32
-    TX_PER_BLOCK = 2
-    RPC_PORT = ${rpcport}
-    REORG_LIMIT = 800
-    PEERS = []
-
-`
+                                    let new_coin = prepare_coins_py(name_fixed, ticker, rpcport)
 
                                     // Save to coins.y
                                     const spv_folder = `/home/ubuntu/spv-server`
@@ -407,10 +408,141 @@ PEER_DISCOVERY = self
                                     while(!reported) {
                                         try {
                                             console.log('Reporting to the server...')
-                                            await reportSPVEnabled(c._id)  
+                                            await reportSPV(c._id, 'Enabled')  
                                             reported = true
                                         } catch (error) {
                                             console.log(`Could not report enabling of SPV Server for ${name_fixed} / ${ticker} to the server`)   
+                                            console.log('Will try again soon...')
+                                            await sleep(20000)
+                                        }
+                                    }
+                                }
+                            }
+                                    
+                            resolve()
+                        })
+                    }).on('error', err => { 
+                        console.log('Error: ' + err.message) 
+                        resolve()
+                    })
+                } catch (error) {
+                    console.log('Error: ' + error)
+                    resolve()
+                }
+            }))
+            
+            await sleep(5000)
+        }
+    })()
+}
+
+
+
+
+// Wait till 32 before launching up SPV server
+else if(action === 'removeSPV') {
+    (async () => {
+        console.log('Will Remove SPV Servers')
+
+        while(1) {
+            await (new Promise(function (resolve, reject) {
+                try { 
+                    console.log('Getting awaiting SPV servers')
+                    https.get(server_url + '/chains/awaiting_spv_server_removal', response => {
+                        let data = ''
+                        
+                        // A chunk of data has been recieved.
+                        response.on('data', chunk => { data += chunk })
+                    
+                        // The whole response has been received. Print out the result.
+                        response.on('end', async () => {
+                            let chains 
+                            try { chains = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
+                            
+                            // Loop all the chains which await for SPV Server setup
+                            if(chains !== undefined && Array.isArray(chains)) {
+                                console.log(`Found ${chains.length} chains`)
+                                for(let c of chains) {
+                                    const ticker = c.params_object.ac_name
+                                    const p2pport = c.status.p2pport
+                                    const rpcport = c.status.rpcport
+                                    const tcpport = p2pport-1 // -1 is p2pport
+                                    const spv_rpcport = p2pport-2
+                                    const name_fixed = '_' + replaceAll(c.params_object.full_name, ' ', '') // Remove spaces
+
+                                    console.log(`Disabling SPV Server for:  ${name_fixed}  ${ticker}  ${rpcport}`)
+                                    
+                                    // Enable the ports for this chain
+                                    execSync('sudo ufw delete allow ' + p2pport)
+                                    execSync('sudo ufw delete allow out ' + p2pport)
+                                    execSync('sudo ufw delete allow ' + tcpport)
+                                    execSync('sudo ufw delete allow out ' + tcpport)
+                                    execSync('sudo ufw reload')
+
+                                    // Remove Coin details from the coins.py
+                                    let new_coin = prepare_coins_py(name_fixed, ticker, rpcport)
+
+                                    // Save to coins.y
+                                    const spv_folder = `/home/ubuntu/spv-server`
+                                    const electrum_folder = `${spv_folder}/electrumx`
+                                    const coins_path = `${electrum_folder}/electrumx/lib/coins.py`
+                                    let coins = fs.readFileSync(coins_path, 'utf8')
+                                    fs.writeFileSync(coins_path, coins.replace(new_coin, ''))
+                                    
+                                    // Build for new coin in coins.py
+                                    console.log('Building electrumx...')
+                                    execSync(`cd ${electrum_folder} && sudo python3.6 ${electrum_folder}/setup.py build`)
+                                    console.log('Installing electrumx...')
+                                    execSync(`cd ${electrum_folder} && sudo python3.6 ${electrum_folder}/setup.py install`)
+                                    
+                                    // Run komodod for the new chain
+                                    console.log('Stopping komodod...')
+                                    exec(`pkill -f "${c.params.replace(' &', '')}"`)
+                                    
+                                    // Delete .conf of komodod
+                                    console.log('Deleting komodod conf...')
+                                    execSync(`sudo rm -rf /home/ubuntu/.komodo/${ticker}`)
+
+                                    // More variables
+                                    const rpcuser = 'clizard'
+                                    const rpcpassword = 'local321'
+                                    const service_name = `electrumx_${ticker}`
+                                    const db_folder = `${spv_folder}/SPV/${ticker}`
+                                    const daemon_url = `http://${rpcuser}:${rpcpassword}@localhost:${rpcport}/`
+                                    const conf_file = `${spv_folder}/config/electrumx_${ticker}.conf`
+
+                                    // Create the service file and copy it to system
+                                    console.log('Removing service file...')
+
+                                    execSync(`sudo rm -rf /etc/systemd/system/electrumx_${ticker}.service`)
+                                    
+                                    // Remove the DB Folder
+                                    execSync(`sudo rm -rf ${db_folder}`)
+                                    
+                                    // Remove the config file
+                                    execSync(`sudo rm -rf ${conf_file}`)
+
+                                    // Stop the server
+                                    console.log('Stop SPV server...')
+                                    execSync(`sudo systemctl stop ${service_name}`)
+
+                                    // Remove SPV cleanup line from crontab
+                                    console.log('Removing SPV cleanup from crontab...')
+                                    execSync(`crontab -u mobman -l | grep -v 'systemctl stop ${service_name} && COIN=${name_fixed}' | crontab -u mobman -`)
+
+                                    // Reload systemctl daemon 
+                                    console.log('Reloading systemctl daemon...')
+                                    execSync(`sudo systemctl daemon-reload`)
+
+                                    // Enabled SPV Server for this chain, report to the CL server
+                                    let reported = false
+                                    while(!reported) {
+                                        try {
+                                            console.log('Reporting to the server...')
+                                            await reportSPV(c._id, 'Disabled')  
+                                            reported = true
+                                        } catch (error) {
+                                            console.log(`Could not report disabling of SPV Server for ${name_fixed} / ${ticker} to the server`)   
                                             console.log('Will try again soon...')
                                             await sleep(20000)
                                         }
