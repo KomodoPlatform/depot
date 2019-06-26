@@ -502,6 +502,7 @@ else if(action === 'removeSPV') {
                                     // Delete .conf of komodod
                                     console.log('Deleting komodod conf...')
                                     execSync(`sudo rm -rf /home/ubuntu/.komodo/${ticker}`)
+                                    execSync(`sudo rm -rf /home/ubuntu/${ticker}_7776`)
 
                                     // More variables
                                     const rpcuser = 'clizard'
@@ -528,7 +529,7 @@ else if(action === 'removeSPV') {
 
                                     // Remove SPV cleanup line from crontab
                                     console.log('Removing SPV cleanup from crontab...')
-                                    execSync(`crontab -u mobman -l | grep -v 'systemctl stop ${service_name} && COIN=${name_fixed}' | crontab -u mobman -`)
+                                    execSync(`crontab -l | grep -v 'systemctl stop ${service_name} && COIN=${name_fixed}' | crontab -`)
 
                                     // Reload systemctl daemon 
                                     console.log('Reloading systemctl daemon...')
