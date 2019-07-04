@@ -143,21 +143,18 @@ else if(action === 'sendPremined') {
                     console.log('Reached block 128')
 
                     // Send
-                    while(1) {
-                        try {
-                            execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + 
-                                    ' sendtoaddress ' + kmd_address + ' ' + ac_supply)
-                            
-                            console.log('Sent premined coins')
-                            
-                            // Our message is delivered to server perfectly, can exit this script safely
-                            time_to_stop = true
-                            clearInterval(interval)
-                            break
-                        } catch (error) {
-                            console.log(error)
-                            await sleep(10000)
-                        }
+                    try {
+                        execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + 
+                                ' sendtoaddress ' + kmd_address + ' ' + ac_supply)
+                        
+                        console.log('Sent premined coins')
+                        
+                        // Our message is delivered to server perfectly, can exit this script safely
+                        time_to_stop = true
+                        clearInterval(interval)
+                    } catch (error) {
+                        console.log(error)
+                        await sleep(10000)
                     }
                 }
             } catch (error) {
