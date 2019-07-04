@@ -16,7 +16,6 @@ const action = process.argv[3]
 const server_url = process.argv[4] || '' // Needs to end with / because the action will be appended as endpoint
 const database_id = process.argv[5] || '' 
 const kmd_address = process.argv[6] || '' 
-const ac_supply = process.argv[7] || '' 
 
 const prepare_coins_py = (name_fixed, ticker, rpcport) => `
 class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
@@ -144,8 +143,7 @@ else if(action === 'sendPremined') {
 
                     // Send
                     try {
-                        execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + 
-                                ' sendtoaddress ' + kmd_address + ' ' + ac_supply)
+                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
                         
                         console.log('Sent premined coins')
                         
