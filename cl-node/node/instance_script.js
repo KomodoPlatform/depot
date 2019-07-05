@@ -98,8 +98,10 @@ if(action === 'reportStoppedGen') {
                 if(info.blocks >= 129) {
                     console.log('Reached block 129')
 
-                    // Stop -gen
-                    execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + ' setgenerate false')
+                    // setgenerate false
+                    execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate false`)
+                    // Remove -gen from crontab
+                    execSync(`crontab -l | sed -e 's/\-gen //g' | crontab -`)
 
                     // Report to the server
                     https.get(server_url + '/chains/report/stoppedGen', response => {
