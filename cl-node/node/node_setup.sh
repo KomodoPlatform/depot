@@ -7,8 +7,6 @@ sudo apt-get -y install build-essential pkg-config libc6-dev m4 g++-multilib aut
 sudo ufw default deny incoming
 sudo ufw default deny outgoing
 sudo ufw allow out 53
-sudo ufw allow ssh
-sudo ufw allow out ssh
 sudo ufw allow http
 sudo ufw allow out http
 sudo ufw allow https
