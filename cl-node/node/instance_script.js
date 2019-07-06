@@ -16,7 +16,6 @@ const action = process.argv[3]
 const server_url = process.argv[4] || '' // Needs to end with / because the action will be appended as endpoint
 const database_id = process.argv[5] || '' 
 const kmd_address = process.argv[6] || '' 
-const ac_supply = process.argv[7] || '' 
 
 const prepare_coins_py = (name_fixed, ticker, rpcport) => `
 class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
@@ -99,8 +98,10 @@ if(action === 'reportStoppedGen') {
                 if(info.blocks >= 129) {
                     console.log('Reached block 129')
 
-                    // Stop -gen
-                    execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + ' setgenerate false')
+                    // setgenerate false
+                    execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate false`)
+                    // Remove -gen from crontab
+                    execSync(`crontab -l | sed -e 's/\-gen //g' | crontab -`)
 
                     // Report to the server
                     https.get(server_url + '/chains/report/stoppedGen', response => {
@@ -143,21 +144,17 @@ else if(action === 'sendPremined') {
                     console.log('Reached block 128')
 
                     // Send
-                    while(1) {
-                        try {
-                            execSync('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + 
-                                    ' sendtoaddress ' + kmd_address + ' ' + ac_supply)
-                            
-                            console.log('Sent premined coins')
-                            
-                            // Our message is delivered to server perfectly, can exit this script safely
-                            time_to_stop = true
-                            clearInterval(interval)
-                            break
-                        } catch (error) {
-                            console.log(error)
-                            await sleep(10000)
-                        }
+                    try {
+                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
+                        
+                        console.log('Sent premined coins')
+                        
+                        // Our message is delivered to server perfectly, can exit this script safely
+                        time_to_stop = true
+                        clearInterval(interval)
+                    } catch (error) {
+                        console.log(error)
+                        await sleep(10000)
                     }
                 }
             } catch (error) {
