@@ -353,7 +353,7 @@ rpcallowip=127.0.0.1
                                         console.log('Running komodod...')
                                         const komodod_start_line = `/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`
                                         exec(komodod_start_line)
-                                        execSync(`(crontab -l 2>/dev/null; echo "${komodod_start_line}") | crontab -`)
+                                        execSync(`(crontab -l 2>/dev/null; echo "@reboot ${komodod_start_line}") | crontab -`)
                                         
                                         // Wait a little for komodod to start
                                         console.log('Waiting a little bit for komodod to launch properly...')
@@ -538,7 +538,8 @@ else if(action === 'removeSPV') {
                                         try {
                                             execSync(`sudo systemctl --now disable ${service_name}`)
                                         } catch (error) {
-                                            if(error.message.indexOf('not loaded') !== -1) {
+                                            if(error.message.indexOf('not loaded') !== -1 ||
+                                               error.message.indexOf('No such file or directory') !== -1) {
                                                 // Not an error
                                                 console.log('Not an error!')
                                             }
