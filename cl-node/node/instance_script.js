@@ -401,7 +401,7 @@ PEER_DISCOVERY = self
 
                                         // Start the server
                                         console.log('Starting SPV server...')
-                                        execSync(`sudo systemctl start ${service_name}`)
+                                        execSync(`sudo systemctl --now enable ${service_name}`)
 
                                         // Enabled SPV Server for this chain, report to the CL server
                                         let reported = false
@@ -536,7 +536,7 @@ else if(action === 'removeSPV') {
                                         // Stop the server
                                         console.log('Stop SPV server...')
                                         try {
-                                            execSync(`sudo systemctl stop ${service_name}`)
+                                            execSync(`sudo systemctl --now disable ${service_name}`)
                                         } catch (error) {
                                             if(error.message.indexOf('not loaded') !== -1) {
                                                 // Not an error
