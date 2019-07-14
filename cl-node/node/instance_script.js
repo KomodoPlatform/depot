@@ -532,8 +532,12 @@ else if(action === 'removeSPV') {
                                         } catch (error) {
                                             if(error.message.indexOf('not loaded') !== -1) {
                                                 // Not an error
+                                                console.log('Not an error!')
                                             }
-                                            else throw error
+                                            else {
+                                                console.log('Should stop...')
+                                                throw error
+                                            }
                                         }
 
                                         // Remove SPV cleanup line from crontab
