@@ -351,7 +351,9 @@ rpcallowip=127.0.0.1
 
                                         // Run komodod for the new chain
                                         console.log('Running komodod...')
-                                        exec(`/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`)
+                                        const komodod_start_line = `/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`
+                                        exec(komodod_start_line)
+                                        execSync(`(crontab -l 2>/dev/null; echo "${komodod_start_line}") | crontab -`)
                                         
                                         // Wait a little for komodod to start
                                         console.log('Waiting a little bit for komodod to launch properly...')
@@ -500,7 +502,13 @@ else if(action === 'removeSPV') {
                                         // Run komodod for the new chain
                                         console.log('Stopping komodod...')
                                         exec(`pkill -f "${c.params.replace(' &', '')}"`)
-                                        
+
+                                        // Remove komodod line from crontab
+                                        console.log('Removing komodod line from crontab...')
+                                        const komodod_start_line = `/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`
+                                        exec(komodod_start_line)
+                                        execSync(`crontab -l | grep -v '${komodod_start_line}' | crontab -`)
+
                                         // Delete .conf of komodod
                                         console.log('Deleting komodod conf...')
                                         execSync(`sudo rm -rf /home/ubuntu/.komodo/${ticker}`)
