@@ -527,7 +527,14 @@ else if(action === 'removeSPV') {
 
                                         // Stop the server
                                         console.log('Stop SPV server...')
-                                        execSync(`sudo systemctl stop ${service_name}`)
+                                        try {
+                                            execSync(`sudo systemctl stop ${service_name}`)
+                                        } catch (error) {
+                                            if(error.message.indexOf('not loaded') !== -1) {
+                                                // Not an error
+                                            }
+                                            else throw error
+                                        }
 
                                         // Remove SPV cleanup line from crontab
                                         console.log('Removing SPV cleanup from crontab...')
