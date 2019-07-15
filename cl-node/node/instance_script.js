@@ -530,10 +530,6 @@ else if(action === 'removeSPV') {
                                         const daemon_url = `http://${rpcuser}:${rpcpassword}@localhost:${rpcport}/`
                                         const conf_file = `${spv_folder}/config/electrumx_${ticker}.conf`
 
-                                        // Create the service file and copy it to system
-                                        console.log('Removing service file...')
-
-                                        execSync(`sudo rm -rf /etc/systemd/system/electrumx_${ticker}.service`)
                                         
                                         // Remove the DB Folder
                                         console.log('Removing db folder: ' + db_folder)
@@ -558,6 +554,11 @@ else if(action === 'removeSPV') {
                                                 throw error
                                             }
                                         }
+                                        
+                                        // Create the service file and copy it to system
+                                        console.log('Removing service file...')
+
+                                        execSync(`sudo rm -rf /etc/systemd/system/electrumx_${ticker}.service`)
 
                                         // Remove SPV cleanup line from crontab
                                         console.log('Removing SPV cleanup from crontab...')
