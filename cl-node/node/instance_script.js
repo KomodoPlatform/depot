@@ -504,15 +504,24 @@ else if(action === 'removeSPV') {
                                         exec(`pkill -f "${c.params.replace(' &', '')}"`)
 
                                         // Remove komodod line from crontab
-                                        console.log('Removing komodod line from crontab...')
-                                        const komodod_start_line = `/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`
-                                        exec(komodod_start_line)
-                                        execSync(`crontab -l | grep -v '${komodod_start_line}' | crontab -`)
+                                        try {
+                                            console.log('Removing komodod line from crontab...')
+                                            const komodod_start_line = `/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`
+                                            exec(komodod_start_line)
+                                            execSync(`crontab -l | grep -v '${komodod_start_line}' | crontab -`)       
+                                        } catch (error) {
+                                            console.log('Could not remove komodod line from crontab, but it is okay')
+                                        }
 
                                         // Delete .conf of komodod
                                         console.log('Deleting komodod conf...')
-                                        execSync(`sudo rm -rf /home/ubuntu/.komodo/${ticker}`)
-                                        execSync(`sudo rm -rf /home/ubuntu/${ticker}_7776`)
+                                        try {
+                                            execSync(`sudo rm -rf /home/ubuntu/.komodo/${ticker}`)
+                                            execSync(`sudo rm -rf /home/ubuntu/${ticker}_7776`)
+                                        } catch (error) {
+                                            console.log('Error at delete komodod conf!')
+                                            console.log(error)
+                                        }
 
                                         // More variables
                                         const rpcuser = 'clizard'
@@ -528,9 +537,11 @@ else if(action === 'removeSPV') {
                                         execSync(`sudo rm -rf /etc/systemd/system/electrumx_${ticker}.service`)
                                         
                                         // Remove the DB Folder
+                                        console.log('Removing db folder: ' + db_folder)
                                         execSync(`sudo rm -rf ${db_folder}`)
                                         
                                         // Remove the config file
+                                        console.log('Removing config file: ' + conf_file)
                                         execSync(`sudo rm -rf ${conf_file}`)
 
                                         // Stop the server
