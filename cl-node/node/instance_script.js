@@ -499,16 +499,15 @@ else if(action === 'removeSPV') {
                                         console.log('Installing electrumx...')
                                         execSync(`cd ${electrum_folder} && sudo python3.6 ${electrum_folder}/setup.py install`)
                                         
-                                        // Run komodod for the new chain
+                                        // Stop komodod for the new chain
+                                        const komodod_clean_line = `/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`
                                         console.log('Stopping komodod...')
-                                        exec(`pkill -f "${c.params.replace(' &', '')}"`)
+                                        exec(`sudo pkill -f "${komodod_clean_line}"`)
 
                                         // Remove komodod line from crontab
                                         try {
                                             console.log('Removing komodod line from crontab...')
-                                            const komodod_start_line = `/home/ubuntu/komodo/src/${c.params.replace(' &', '')}`
-                                            exec(komodod_start_line)
-                                            execSync(`crontab -l | grep -v '${komodod_start_line}' | crontab -`)       
+                                            execSync(`crontab -l | grep -v '${komodod_clean_line}' | crontab -`)       
                                         } catch (error) {
                                             console.log('Could not remove komodod line from crontab, but it is okay')
                                         }
