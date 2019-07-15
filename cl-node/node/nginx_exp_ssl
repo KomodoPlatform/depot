@@ -4,7 +4,7 @@ server {
         return 301 https://$host$request_uri;
 }
 
-# HTTPS - proxy requests to Chainlizard Explorer (security/efficiency):
+# HTTPS - proxy requests to Antara Composer Explorer (security/efficiency):
 server {
         listen 443;
         server_name exp.naezith.com;

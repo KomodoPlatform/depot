@@ -1,4 +1,4 @@
-# HTTP - proxy requests to Chainlizard Explorer (security/efficiency):
+# HTTP - proxy requests to Antara Composer Explorer (security/efficiency):
 server {
         listen 80;
         listen [::]:80 default_server ipv6only=on;
