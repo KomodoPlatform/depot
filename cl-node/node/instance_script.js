@@ -247,15 +247,17 @@ else if(action === 'withdrawBalance') {
                             let withdrawal 
                             try { withdrawal = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
                             
-                            // If yes,
-                            if(withdrawal.status === true) {
-                                console.log(`Withdrawing all balance to address`)
-                                
-                                execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
-                        
-                                console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
-                            }
+                            try {
+                                // If yes,
+                                if(withdrawal !== undefined && withdrawal.status === true) {
+                                    console.log(`Withdrawing all balance to address`)
                                     
+                                    execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
+                            
+                                    console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
+                                }
+                            } catch (error) { console.log('Failed at sendtoaddress', error) }
+                            
                             resolve()
                         }))
                         
