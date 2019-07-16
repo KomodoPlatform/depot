@@ -38,8 +38,14 @@ const reportSPV =  (chain_id, spv_status) => {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }
             }, res => res.on('data', d => {
                 process.stdout.write(d + '\n')
-                if(JSON.parse(d).status === 0) resolve()
-                else reject()
+                try {
+                    let parsed = JSON.parse(d)
+                    if(parsed !== undefined && parsed.status === 0) resolve()
+                    else reject()
+                } catch (error) {
+                    console.log('reportSPV parse failed', error)
+                    reject()
+                }
             }))
             
             req.on('error', e => console.error(e))
@@ -80,7 +86,16 @@ const getInfo = () =>
                 reject(stderr)
             }
 
-            if(stdout) resolve(JSON.parse(stdout))
+            if(stdout) {
+                let parsed
+                try {
+                    parsed = JSON.parse(stdout)
+                } catch (error) {
+                    console.log('Failed to parse getInfo: ', error)
+                }
+
+                resolve(parsed || {})
+            }
         })
     });
 
