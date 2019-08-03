@@ -267,7 +267,25 @@ else if(action === 'withdrawBalance') {
                                 if(withdrawal !== undefined && withdrawal.status === true) {
                                     console.log(`Withdrawing all balance to address`)
                                     
-                                    execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
+                                    let max_amount_to_send = 500
+                                    let done = false
+                                    while(!done) {
+                                        let curr_balance = parseFloat(execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance`))
+                                        console.log('Current balance: ' + curr_balance)
+
+                                        let amt
+                                        if(curr_balance > max_amount_to_send) {
+                                            amt = max_amount_to_send
+                                        }
+                                        else {
+                                            amt = curr_balance
+                                            done = true
+                                        }
+
+                                        const cmd = `/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} ${amt} "" "" true`
+                                        console.log(cmd)
+                                        execSync(cmd)
+                                    }
                             
                                     console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
                                 }
