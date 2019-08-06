@@ -267,28 +267,24 @@ else if(action === 'withdrawBalance') {
                                 if(withdrawal !== undefined && withdrawal.status === true) {
                                     console.log(`Withdrawing all balance to address`)
                                     
-                                    let max_amount_to_send = 1000
-                                    let done = false
-                                    while(!done && max_amount_to_send >= 1) {
-                                        let curr_balance = parseFloat(execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance`))
-                                        console.log('Current balance: ' + curr_balance)
+                                    let curr_balance = 1
+                                    let amount_to_send = undefined
+                                    while(curr_balance >= 1 && (!amount_to_send || amount_to_send >= 1)) {
+                                        curr_balance = parseFloat(execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance`))
+                                        if(!amount_to_send) amount_to_send = curr_balance
 
-                                        let amt
-                                        if(curr_balance < max_amount_to_send) {
-                                            amt = curr_balance
-                                            done = true
-                                        }
-                                        else amt = max_amount_to_send
-                            
+                                        if(curr_balance >= 1 && amount_to_send >= 1) {
+                                            console.log('Current balance: ' + curr_balance)
 
-                                        try {
-                                            const cmd = `/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} ${amt} "" "" true`
-                                            console.log(cmd)
-                                            execSync(cmd)
-                                        } catch (error) {
-                                            console.log('Failed to send: ' + error)
-                                            console.log('Halving the amount, will try again: ' + error)
-                                            max_amount_to_send *= 0.5
+                                            try {
+                                                const cmd = `/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} ${amount_to_send.toFixed(8)} "" "" true`
+                                                console.log(cmd)
+                                                execSync(cmd)
+                                            } catch (error) {
+                                                console.log('Failed to send: ' + error)
+                                                console.log('Halving the amount, will try again: ' + error)
+                                                amount_to_send *= 0.5
+                                            }
                                         }
                                     }
                             
