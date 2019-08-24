@@ -99,53 +99,8 @@ const getInfo = () =>
         })
     });
 
-// Report Stopped Gen
-if(action === 'reportStoppedGen') {
-    console.log('Will kill stop gen in this instance when block hits 129')
-
-    let time_to_stop = false
-    
-    let interval = setInterval(async () => {
-        if(!time_to_stop) {
-            try {
-                const info = await getInfo()
-
-                if(info.blocks >= 129) {
-                    console.log('Reached block 129')
-
-                    // setgenerate false
-                    execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate false`)
-                    // Remove -gen from crontab
-                    execSync(`crontab -l | sed -e 's/\-gen //g' | crontab -`)
-
-                    // Report to the server
-                    https.get(server_url + '/chains/report/stoppedGen', response => {
-                        let data = ''
-                        
-                        // A chunk of data has been recieved.
-                        response.on('data', chunk => { data += chunk })
-                    
-                        // The whole response has been received. Print out the result.
-                        response.on('end', () => {
-                            if(JSON.parse(data).status === 0) {
-                                console.log('Going regular... Not gen anymore!')
-                                
-                                // Our message is delivered to server perfectly, can exit this script safely
-                                time_to_stop = true
-                                clearInterval(interval)
-                            }
-                        })
-                    }).on('error', err => { console.log('Error: ' + err.message) })
-                }
-            } catch (error) {
-                console.log('Error: ' + error)
-            }
-        }
-    }, 5*60*1000)
-}
-
 // Send premined coins
-else if(action === 'sendPremined') {
+if(action === 'sendPremined') {
     console.log('Will send premined coins when block hits 128')
 
     let time_to_stop = false
@@ -265,30 +220,48 @@ else if(action === 'withdrawBalance') {
                             try {
                                 // If yes,
                                 if(withdrawal !== undefined && withdrawal.status === true) {
-                                    console.log(`Withdrawing all balance to address`)
-                                    
-                                    let curr_balance = 1
-                                    let amount_to_send = undefined
-                                    while(curr_balance >= 1 && (!amount_to_send || amount_to_send >= 1)) {
-                                        curr_balance = parseFloat(execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance`))
-                                        if(!amount_to_send) amount_to_send = curr_balance
+                                    if(withdrawal.action === 'start_gen') {
+                                        // setgenerate true
+                                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate true`)
+                                        // Add -gen to crontab
+                                        execSync(`crontab -l | sed -e 's/\-addnode=/\-gen \-addnode/g' | crontab -`)
 
-                                        if(curr_balance >= 1 && amount_to_send >= 1) {
-                                            console.log('Current balance: ' + curr_balance)
+                                        console.log('Started gen')
+                                    }
+                                    else if(withdrawal.action === 'stop_gen') {
+                                        // setgenerate false
+                                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate false`)
+                                        // Remove -gen from crontab
+                                        execSync(`crontab -l | sed -e 's/\-gen //g' | crontab -`)
 
-                                            try {
-                                                const cmd = `/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} ${amount_to_send.toFixed(8)} "" "" true`
-                                                console.log(cmd)
-                                                execSync(cmd)
-                                            } catch (error) {
-                                                console.log('Failed to send: ' + error)
-                                                console.log('Halving the amount, will try again: ' + error)
-                                                amount_to_send *= 0.5
+                                        console.log('Stopped gen')
+                                    }
+                                    else {
+                                        console.log(`Withdrawing all balance to address`)
+                                        
+                                        let curr_balance = 1
+                                        let amount_to_send = undefined
+                                        while(curr_balance >= 1 && (!amount_to_send || amount_to_send >= 1)) {
+                                            curr_balance = parseFloat(execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance`))
+                                            if(!amount_to_send) amount_to_send = curr_balance
+    
+                                            if(curr_balance >= 1 && amount_to_send >= 1) {
+                                                console.log('Current balance: ' + curr_balance)
+    
+                                                try {
+                                                    const cmd = `/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} ${amount_to_send.toFixed(8)} "" "" true`
+                                                    console.log(cmd)
+                                                    execSync(cmd)
+                                                } catch (error) {
+                                                    console.log('Failed to send: ' + error)
+                                                    console.log('Halving the amount, will try again: ' + error)
+                                                    amount_to_send *= 0.5
+                                                }
                                             }
                                         }
+                                
+                                        console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
                                     }
-                            
-                                    console.log(`Sent all balance (${info.balance}) to ${withdrawal.kmd_address}`)
                                 }
                             } catch (error) { console.log('Failed at sendtoaddress', error) }
                             
