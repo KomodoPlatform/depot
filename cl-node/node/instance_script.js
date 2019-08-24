@@ -224,7 +224,7 @@ else if(action === 'withdrawBalance') {
                                         // setgenerate true
                                         execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate true`)
                                         // Add -gen to crontab
-                                        execSync(`crontab -l | sed -e 's/\-addnode=/\-gen \-addnode/g' | crontab -`)
+                                        execSync(`crontab -l | sed -e 's/\-addnode/\-gen \-addnode/g' | crontab -`)
 
                                         console.log('Started gen')
                                     }
