@@ -236,7 +236,7 @@ else if(action === 'withdrawBalance') {
 
                                         console.log('Stopped gen')
                                     }
-                                    else {
+                                    else if(withdrawal.action === 'withdraw') {
                                         console.log(`Withdrawing all balance to address`)
                                         
                                         let curr_balance = 1
