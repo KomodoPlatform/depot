@@ -220,9 +220,11 @@ else if(action === 'withdrawBalance') {
                             try {
                                 // If yes,
                                 if(withdrawal !== undefined && withdrawal.status === true) {
+                                    let withdraw_all_balance_now = false
+                                    
                                     if(withdrawal.action === 'start_gen') {
                                         // setgenerate true
-                                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate true`)
+                                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate true -1`)
                                         // Add -gen to crontab
                                         execSync(`crontab -l | sed -e 's/\-addnode/\-gen \-addnode/g' | crontab -`)
 
@@ -235,8 +237,13 @@ else if(action === 'withdrawBalance') {
                                         execSync(`crontab -l | sed -e 's/\-gen //g' | crontab -`)
 
                                         console.log('Stopped gen')
+
+                                        // Withdraw all at stop gen
+                                        withdraw_all_balance_now = true
                                     }
-                                    else if(withdrawal.action === 'withdraw') {
+                                    
+                                    // Withdraw when requested, or when gen stops
+                                    if(withdrawal.action === 'withdraw' || withdraw_all_balance_now) {
                                         console.log(`Withdrawing all balance to address`)
                                         
                                         let curr_balance = 1
