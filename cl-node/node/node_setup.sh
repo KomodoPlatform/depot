@@ -39,6 +39,7 @@ mkdir /home/ubuntu/spv-server/config
 
 ## Install Komodo
 mkdir /home/ubuntu/komodo
+echo -n 0.5.0 > /home/ubuntu/komodo_version.txt
 wget -qO- https://github.com/KomodoPlatform/komodo/releases/download/0.5.0/komodo_0.5.0_linux.tar.gz | tar xvz -C /home/ubuntu/komodo
 cd /home/ubuntu/komodo
 mkdir /home/ubuntu/komodo/src

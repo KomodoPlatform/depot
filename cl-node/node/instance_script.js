@@ -147,8 +147,7 @@ else if(action === 'saveNodeImage') {
     console.log('Will report to save node image')
     
     // Extract Komodo Version
-    const komodo_cpp = fs.readFileSync('/home/ubuntu/komodo/src/rpc/misc.cpp', 'utf8')
-    const komodo_version = komodo_cpp.match('KOMODO_VERSION "(.+)"')[1]
+    const komodo_version = fs.readFileSync('/home/ubuntu/komodo_version.txt', 'utf8')
     
     console.log('Komodo Version: ', komodo_version)
     try {
