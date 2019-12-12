@@ -41,10 +41,12 @@ mkdir /home/ubuntu/spv-server/config
 mkdir /home/ubuntu/komodo
 wget -qO- https://github.com/KomodoPlatform/komodo/releases/download/0.5.0/komodo_0.5.0_linux.tar.gz | tar xvz -C /home/ubuntu/komodo
 cd /home/ubuntu/komodo
-mv /home/ubuntu/komodo/linux64/* /home/ubuntu/komodo/
-rm -rf /home/ubuntu/komodo/linux64
+mkdir /home/ubuntu/komodo/src
 mkdir /home/ubuntu/komodo/zcutil
-mv /home/ubuntu/komodo/fetch-params.sh  /home/ubuntu/komodo/zcutil/fetch-params.sh
+mv /home/ubuntu/komodo/linux64/komodod /home/ubuntu/komodo/src
+mv /home/ubuntu/komodo/linux64/komodo-cli /home/ubuntu/komodo/src
+mv /home/ubuntu/komodo/linux64/fetch-params.sh /home/ubuntu/komodo/zcutil/
+rm -rf /home/ubuntu/komodo/linux64
 /home/ubuntu/komodo/zcutil/fetch-params.sh 
 
 ## Install Node for the custom script
