@@ -191,7 +191,7 @@ else if(action === 'updateKomodoVersion') {
         while(1) {
             await (new Promise(function (resolve, reject) {
                 try { 
-                    console.log('Getting chain info')
+                    console.log('Getting version from the server')
                     https.get(server_url + '/chains/get_komodo_version/' + ac_name, response => {
                         let data = ''
                         
@@ -215,6 +215,7 @@ else if(action === 'updateKomodoVersion') {
 
                                     if(local_komodo_version === KMDversion) {
                                         console.log("Version is same, no need to update")
+                                        resolve()
                                     }
                                     else {
                                         // Update is required
