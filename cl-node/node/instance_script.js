@@ -201,7 +201,7 @@ else if(action === 'updateKomodoVersion') {
                         // The whole response has been received. Print out the result.
                         response.on('end', async () => {
                             let update_info 
-                            try { chains = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
+                            try { update_info = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
                             
                             try {
                                 // Loop all the chains which await for SPV Server setup
@@ -247,7 +247,10 @@ else if(action === 'updateKomodoVersion') {
                                         })
                                     }
                                 }
-                                else resolve()
+                                else {
+                                    console.log("Undefined update info!")
+                                    resolve()
+                                }
                             } catch (err) {
                                 console.log('Error: ' + err.message) 
                                 resolve()
