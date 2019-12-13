@@ -225,13 +225,25 @@ else if(action === 'updateKomodoVersion') {
                                         download(`https://raw.githubusercontent.com/naezith/depot/master/cl-node/node/komodod_updates/${file_name}`, update_script_path, (err) => {
                                             if(err) throw err
                                             
-                                            // File downloaded successfully
-                                            console.log("Update file downloaded successfully")
-                                            console.log("Running the update script...")
-                                            execSync(`sudo bash ${update_script_path}`)
-                                            console.log("Completed the update script")
-                                            console.log("Rebooting the server...")
-                                            execSync(`sudo reboot`)
+                                            try {
+                                                // File downloaded successfully
+                                                console.log("Update file downloaded successfully")
+                                                console.log("Running the update script...")
+                                                execSync(`sudo bash ${update_script_path}`)
+                                                console.log("Completed the update script")
+
+                                                // Update the version file
+                                                console.log("Updating the local version file")
+                                                fs.writeFileSync(komodo_version_file_path, `${KMDversion}`)
+                                                
+                                                console.log("Rebooting the server...")
+                                                execSync(`sudo reboot`)
+
+                                                resolve()
+                                            } catch (error) {
+                                                console.log('Error: ' + error)
+                                                resolve()
+                                            }
                                         })
                                     }
                                 }
