@@ -8,6 +8,22 @@ const exec = require('child_process').exec
 const execSync = require('child_process').execSync
 const https = require('https')
 
+const download = function(url, dest, cb) {
+    console.log(`Will download ${url} to ${dest}...`)
+    let file = fs.createWriteStream(dest);
+    let request = https.get(url, function(response) {
+        response.pipe(file);
+        file.on('finish', function() {
+            file.close(cb);  // close() is async, call cb after close completes.
+            console.log("Download complete!")
+        });
+    }).on('error', function(err) { // Handle errors
+        console.log("Error at download!")
+        fs.unlink(dest); // Delete the file async. (But we don't check the result)
+        if (cb) cb(err);
+    });
+};
+
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 const replaceAll = (string, search, replacement) => string.split(search).join(replacement)
 
@@ -30,6 +46,8 @@ class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
     PEERS = []
 
 `
+const komodo_version_file_path = '/home/ubuntu/komodo_version.txt'
+const getKomodoVersion = () => fs.readFileSync(komodo_version_file_path, 'utf8')
 
 const reportSPV =  (chain_id, spv_status) => {
     return new Promise(function (resolve, reject) {
@@ -147,7 +165,7 @@ else if(action === 'saveNodeImage') {
     console.log('Will report to save node image')
     
     // Extract Komodo Version
-    const komodo_version = fs.readFileSync('/home/ubuntu/komodo_version.txt', 'utf8')
+    const komodo_version = getKomodoVersion()
     
     console.log('Komodo Version: ', komodo_version)
     try {
@@ -165,6 +183,78 @@ else if(action === 'saveNodeImage') {
 
 
 
+// Wait till 32 before launching up SPV server
+else if(action === 'updateKomodoVersion') {
+    (async () => {
+        console.log('Will update Komodo if version changes')
+        
+        while(1) {
+            await (new Promise(function (resolve, reject) {
+                try { 
+                    console.log('Getting chain info')
+                    https.get(server_url + '/chains/get_komodo_version/' + ac_name, response => {
+                        let data = ''
+                        
+                        // A chunk of data has been recieved.
+                        response.on('data', chunk => { data += chunk })
+                    
+                        // The whole response has been received. Print out the result.
+                        response.on('end', async () => {
+                            let update_info 
+                            try { chains = JSON.parse(data) } catch (error) { console.log('JSON Parsing error', error) }
+                            
+                            try {
+                                // Loop all the chains which await for SPV Server setup
+                                if(update_info !== undefined) {
+                                    let KMDversion = update_info.KMDversion
+                                    console.log(`Version at the server: ` + KMDversion)
+
+                                    // Extract local Komodo Version
+                                    const local_komodo_version = getKomodoVersion()
+                                    console.log(`Local version: ` + local_komodo_version)
+
+                                    if(local_komodo_version === KMDversion) {
+                                        console.log("Version is same, no need to update")
+                                    }
+                                    else {
+                                        // Update is required
+                                        console.log(`Update from ${local_komodo_version} to ${KMDversion} is required`)
+                                        
+                                        const file_name = `${KMDversion}.sh`
+                                        const update_script_path = `/home/ubuntu/${file_name}`
+                                        download(`https://raw.githubusercontent.com/naezith/depot/master/cl-node/node/komodod_updates/${file_name}`, update_script_path, (err) => {
+                                            if(err) throw err
+                                            
+                                            // File downloaded successfully
+                                            console.log("Update file downloaded successfully")
+                                            console.log("Running the update script...")
+                                            execSync(`sudo bash ${update_script_path}`)
+                                            console.log("Completed the update script")
+                                            console.log("Rebooting the server...")
+                                            execSync(`sudo reboot`)
+                                        })
+                                    }
+                                }
+                                else resolve()
+                            } catch (err) {
+                                console.log('Error: ' + err.message) 
+                                resolve()
+                            }
+                        })
+                    }).on('error', err => { 
+                        console.log('Error: ' + err.message) 
+                        resolve()
+                    })
+                } catch (error) {
+                    console.log('Error: ' + error)
+                    resolve()
+                }
+            }))
+            
+            await sleep(5000)
+        }
+    })()
+}
 
 
 
