@@ -7,12 +7,12 @@ server {
 # HTTPS - proxy requests to Antara Composer Explorer (security/efficiency):
 server {
         listen 443;
-        server_name exp.naezith.com;
+        server_name composer.kmd.io;
 
         ssl on;
         # Use certificate and key provided by Let's Encrypt:
-        ssl_certificate /etc/letsencrypt/live/exp.naezith.com/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/exp.naezith.com/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/composer.kmd.io/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/composer.kmd.io/privkey.pem;
         ssl_session_timeout 5m;
         ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
         ssl_prefer_server_ciphers on;

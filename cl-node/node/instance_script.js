@@ -223,7 +223,7 @@ else if(action === 'updateKomodoVersion') {
                                         
                                         const file_name = `${KMDversion}.sh`
                                         const update_script_path = `/home/ubuntu/${file_name}`
-                                        download(`https://raw.githubusercontent.com/naezith/depot/master/cl-node/node/komodod_updates/${file_name}`, update_script_path, (err) => {
+                                        download(`https://raw.githubusercontent.com/KomodoPlatform/depot/master/cl-node/node/komodod_updates/${file_name}`, update_script_path, (err) => {
                                             if(err) throw err
                                             
                                             try {
