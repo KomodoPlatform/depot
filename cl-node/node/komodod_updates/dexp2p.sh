@@ -1,4 +1,5 @@
 CONTROL_FILE=/home/ubuntu/dexp2p_complete
+
 # Check if this patch is done
 if [ -f $CONTROL_FILE ]; then
     echo "Already done, nothing to do!"
