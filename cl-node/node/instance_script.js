@@ -236,9 +236,6 @@ else if(action === 'updateKomodoVersion') {
                                                 // Update the version file
                                                 console.log("Updating the local version file")
                                                 fs.writeFileSync(komodo_version_file_path, `${KMDversion}`)
-                                                
-                                                console.log("Rebooting the server...")
-                                                execSync(`sudo reboot`)
 
                                                 resolve()
                                             } catch (error) {
