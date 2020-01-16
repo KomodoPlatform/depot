@@ -33,6 +33,9 @@ const server_url = process.argv[4] || '' // Needs to end with / because the acti
 const database_id = process.argv[5] || '' 
 const kmd_address = process.argv[6] || '' 
 
+const main_kmd_chain = ac_name === 'ADEXP2PT'
+const ac_name_param = main_kmd_chain ? '' : ' -ac_name=' + ac_name
+
 const prepare_coins_py = (name_fixed, ticker, rpcport) => `
 class ${name_fixed}(KomodoMixin, EquihashMixin, Coin):
     NAME = "${name_fixed}"
@@ -93,7 +96,7 @@ const reportStatus = async () => {
 
 const getInfo = () => 
     new Promise((resolve, reject) => {
-        exec('/home/ubuntu/komodo/src/komodo-cli -ac_name=' + ac_name + ' getinfo', (error, stdout, stderr) => {
+        exec('/home/ubuntu/komodo/src/komodo-cli' + ac_name_param + ' getinfo', (error, stdout, stderr) => {
             if(error) {
                 console.log('ERROR: getinfo failed: ', error)
                 reject(error)
@@ -133,7 +136,7 @@ if(action === 'sendPremined') {
 
                     // Send
                     try {
-                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${kmd_address} $(/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance) "" "" true`)
+                        execSync(`/home/ubuntu/komodo/src/komodo-cli${ac_name_param} sendtoaddress ${kmd_address} $(/home/ubuntu/komodo/src/komodo-cli${ac_name_param} getbalance) "" "" true`)
                         
                         console.log('Sent premined coins')
                         
@@ -326,7 +329,7 @@ else if(action === 'withdrawBalance') {
                                     
                                     if(withdrawal.action === 'start_gen') {
                                         // setgenerate true
-                                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate true -1`)
+                                        execSync(`/home/ubuntu/komodo/src/komodo-cli${ac_name_param} setgenerate true -1`)
                                         // Add -gen to crontab
                                         execSync(`crontab -l | sed -e 's/\-addnode/\-gen \-addnode/g' | crontab -`)
 
@@ -334,7 +337,7 @@ else if(action === 'withdrawBalance') {
                                     }
                                     else if(withdrawal.action === 'stop_gen') {
                                         // setgenerate false
-                                        execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} setgenerate false`)
+                                        execSync(`/home/ubuntu/komodo/src/komodo-cli${ac_name_param} setgenerate false`)
                                         // Remove -gen from crontab
                                         execSync(`crontab -l | sed -e 's/\-gen //g' | crontab -`)
 
@@ -351,14 +354,14 @@ else if(action === 'withdrawBalance') {
                                         let curr_balance = 1
                                         let amount_to_send = undefined
                                         while(curr_balance >= 1 && (!amount_to_send || amount_to_send >= 1)) {
-                                            curr_balance = parseFloat(execSync(`/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} getbalance`))
+                                            curr_balance = parseFloat(execSync(`/home/ubuntu/komodo/src/komodo-cli${ac_name_param} getbalance`))
                                             if(!amount_to_send) amount_to_send = curr_balance
     
                                             if(curr_balance >= 1 && amount_to_send >= 1) {
                                                 console.log('Current balance: ' + curr_balance)
     
                                                 try {
-                                                    const cmd = `/home/ubuntu/komodo/src/komodo-cli -ac_name=${ac_name} sendtoaddress ${withdrawal.kmd_address} ${amount_to_send.toFixed(8)} "" "" true`
+                                                    const cmd = `/home/ubuntu/komodo/src/komodo-cli${ac_name_param} sendtoaddress ${withdrawal.kmd_address} ${amount_to_send.toFixed(8)} "" "" true`
                                                     console.log(cmd)
                                                     execSync(cmd)
                                                 } catch (error) {
