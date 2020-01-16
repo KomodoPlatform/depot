@@ -5,3 +5,4 @@ mv /home/ubuntu/komodo_update/linux64/komodo-cli /home/ubuntu/komodo/src
 mv /home/ubuntu/komodo_update/linux64/fetch-params.sh /home/ubuntu/komodo/zcutil/
 rm -rf /home/ubuntu/komodo_update
 /home/ubuntu/komodo/zcutil/fetch-params.sh 
+sudo reboot
